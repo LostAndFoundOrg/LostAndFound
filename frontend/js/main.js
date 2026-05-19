@@ -82,8 +82,8 @@ function applyFilters() {
         filteredItems = filteredItems.filter((item) => {
             const title = item.title ? item.title.toLowerCase() : "";
             const description = item.description ? item.description.toLowerCase() : "";
-            const category = item.category && item.category.name
-                ? item.category.name.toLowerCase()
+            const category = item.categoryName
+                ? item.categoryName.toLowerCase()
                 : "";
             const location = item.location ? item.location.toLowerCase() : "";
 
@@ -105,7 +105,7 @@ function applyFilters() {
 
     if (categoryValue) {
         filteredItems = filteredItems.filter((item) => {
-            return item.category && String(item.category.id) === categoryValue;
+            return String(item.categoryId) === categoryValue;
         });
     }
 
@@ -135,7 +135,9 @@ function renderItems(items) {
         const card = document.createElement("article");
         card.className = "item-card";
 
-        const imageUrl = item.imageUrl || "https://placehold.co/600x400?text=No+Image";
+        const imageUrl = isValidImageUrl(item.imageUrl)
+            ? item.imageUrl
+            : "https://placehold.co/600x400?text=No+Image";
 
         card.innerHTML = `
       <div class="item-image-wrapper">
@@ -162,7 +164,7 @@ function renderItems(items) {
         <div class="item-meta">
           <p>
             <span>Category:</span>
-            ${item.category ? item.category.name : "No category"}
+            ${item.categoryName || "No category"}
           </p>
 
           <p>
@@ -180,9 +182,9 @@ function renderItems(items) {
           ${shortenText(item.description, 110)}
         </p>
 
-        <button type="button" class="btn btn-card">
+        <a href="item-details.html?id=${item.id}" class="btn btn-card">
           View details
-        </button>
+        </a>
       </div>
     `;
 
@@ -296,4 +298,17 @@ function shortenText(text, maxLength) {
     }
 
     return text.slice(0, maxLength) + "...";
+}
+
+function isValidImageUrl(url) {
+    if (!url) {
+        return false;
+    }
+
+    return (
+        url.startsWith("http://") ||
+        url.startsWith("https://") ||
+        url.startsWith("./") ||
+        url.startsWith("/")
+    );
 }

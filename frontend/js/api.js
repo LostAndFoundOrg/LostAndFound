@@ -38,3 +38,18 @@ async function createItem(itemData) {
 
   return response.json();
 }
+
+async function getItemById(id) {
+  const response = await fetch(`${API_BASE_URL}/items/${id}`);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Backend error status:", response.status);
+    console.error("Backend error response:", errorText);
+
+    throw new Error("Failed to fetch item details");
+  }
+
+  return response.json();
+}
