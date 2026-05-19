@@ -1,22 +1,22 @@
 package com.example.lostfound.controller;
 
 import com.example.lostfound.dto.CreateItemRequest;
-import com.example.lostfound.model.Item;
 import com.example.lostfound.dto.ItemResponse;
-import java.util.List;
+import com.example.lostfound.model.Item;
 import com.example.lostfound.service.ItemService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/items")
-@RequiredArgsConstructor
 public class ItemController {
 
     private final ItemService itemService;
+
+    public ItemController(ItemService itemService) {
+        this.itemService = itemService;
+    }
 
     @GetMapping
     public List<ItemResponse> getItems() {
@@ -29,6 +29,24 @@ public class ItemController {
     @PostMapping
     public ItemResponse createItem(@RequestBody CreateItemRequest request) {
         Item item = itemService.createItem(request);
+        return new ItemResponse(item);
+    }
+
+    @PatchMapping("/{id}/approve")
+    public ItemResponse approveItem(@PathVariable Long id) {
+        Item item = itemService.approveItem(id);
+        return new ItemResponse(item);
+    }
+
+    @PatchMapping("/{id}/reject")
+    public ItemResponse rejectItem(@PathVariable Long id) {
+        Item item = itemService.rejectItem(id);
+        return new ItemResponse(item);
+    }
+
+    @PatchMapping("/{id}/return")
+    public ItemResponse returnItem(@PathVariable Long id) {
+        Item item = itemService.returnItem(id);
         return new ItemResponse(item);
     }
 }
