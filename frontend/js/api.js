@@ -53,3 +53,69 @@ async function getItemById(id) {
 
   return response.json();
 }
+
+async function getAdminItems() {
+  const response = await fetch(`${API_BASE_URL}/items/admin`);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Backend error status:", response.status);
+    console.error("Backend error response:", errorText);
+
+    throw new Error("Failed to fetch admin items");
+  }
+
+  return response.json();
+}
+
+async function approveItem(id) {
+  const response = await fetch(`${API_BASE_URL}/items/${id}/approve`, {
+    method: "PATCH"
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Backend error status:", response.status);
+    console.error("Backend error response:", errorText);
+
+    throw new Error("Failed to approve item");
+  }
+
+  return response.json();
+}
+
+async function rejectItem(id) {
+  const response = await fetch(`${API_BASE_URL}/items/${id}/reject`, {
+    method: "PATCH"
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Backend error status:", response.status);
+    console.error("Backend error response:", errorText);
+
+    throw new Error("Failed to reject item");
+  }
+
+  return response.json();
+}
+
+async function returnItem(id) {
+  const response = await fetch(`${API_BASE_URL}/items/${id}/return`, {
+    method: "PATCH"
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Backend error status:", response.status);
+    console.error("Backend error response:", errorText);
+
+    throw new Error("Failed to mark item as returned");
+  }
+
+  return response.json();
+}

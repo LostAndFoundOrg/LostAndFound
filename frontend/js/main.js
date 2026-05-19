@@ -82,9 +82,7 @@ function applyFilters() {
         filteredItems = filteredItems.filter((item) => {
             const title = item.title ? item.title.toLowerCase() : "";
             const description = item.description ? item.description.toLowerCase() : "";
-            const category = item.categoryName
-                ? item.categoryName.toLowerCase()
-                : "";
+            const category = item.categoryName ? item.categoryName.toLowerCase() : "";
             const location = item.location ? item.location.toLowerCase() : "";
 
             return (
@@ -105,7 +103,7 @@ function applyFilters() {
 
     if (categoryValue) {
         filteredItems = filteredItems.filter((item) => {
-            return String(item.categoryId) === categoryValue;
+            return String(item.categoryId) === String(categoryValue);
         });
     }
 
@@ -137,13 +135,13 @@ function renderItems(items) {
 
         const imageUrl = isValidImageUrl(item.imageUrl)
             ? item.imageUrl
-            : "https://placehold.co/600x400?text=No+Image";
+            : "https://placehold.co/600x400/F3F4F6/9CA3AF?text=No+Image";
 
         card.innerHTML = `
       <div class="item-image-wrapper">
         <img
           src="${imageUrl}"
-          alt="${item.title}"
+          alt="${escapeHtml(item.title || "Item image")}"
           class="item-image"
         >
       </div>
@@ -159,17 +157,17 @@ function renderItems(items) {
           </span>
         </div>
 
-        <h3 class="item-title">${item.title}</h3>
+        <h3 class="item-title">${escapeHtml(item.title || "Untitled item")}</h3>
 
         <div class="item-meta">
           <p>
             <span>Category:</span>
-            ${item.categoryName || "No category"}
+            ${escapeHtml(item.categoryName || "No category")}
           </p>
 
           <p>
             <span>Location:</span>
-            ${item.location}
+            ${escapeHtml(item.location || "No location")}
           </p>
 
           <p>
@@ -179,8 +177,13 @@ function renderItems(items) {
         </div>
 
         <p class="item-description">
-          ${shortenText(item.description, 110)}
+          ${escapeHtml(shortenText(item.description, 110))}
         </p>
+
+        <div class="item-contact">
+          <span>Contact:</span>
+          ${escapeHtml(formatContact(item.contactMethod, item.contactValue))}
+        </div>
 
         <a href="item-details.html?id=${item.id}" class="btn btn-card">
           View details
@@ -256,14 +259,14 @@ function getStatusBadgeClass(status) {
 
 function formatType(type) {
     if (type === "LOST") {
-        return "Lost";
+        return "Lost item";
     }
 
     if (type === "FOUND") {
-        return "Found";
+        return "Found item";
     }
 
-    return type;
+    return type || "Unknown type";
 }
 
 function formatStatus(status) {
@@ -280,6 +283,10 @@ function formatDate(dateString) {
     }
 
     const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+        return dateString;
+    }
 
     return date.toLocaleDateString("en-US", {
         year: "numeric",
@@ -311,4 +318,29 @@ function isValidImageUrl(url) {
         url.startsWith("./") ||
         url.startsWith("/")
     );
+}
+
+function formatContact(contactMethod, contactValue) {
+    if (!contactMethod && !contactValue) {
+        return "No contact";
+    }
+
+    if (!contactMethod) {
+        return contactValue;
+    }
+
+    if (!contactValue) {
+        return contactMethod;
+    }
+
+    return `${contactMethod} - ${contactValue}`;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }

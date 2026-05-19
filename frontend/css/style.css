@@ -711,3 +711,33 @@ textarea {
         height: 220px;
     }
 }
+
+.item-contact {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.item-contact span {
+    font-weight: 700;
+    color: #111827;
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 360px));
+    gap: 18px;
+}
+
+.item-card {
+    max-width: 360px;
+}
+
+.item-description {
+    min-height: 42px;
+}
