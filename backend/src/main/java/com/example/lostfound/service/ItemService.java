@@ -65,4 +65,8 @@ public class ItemService {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
     }
+
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
+    }
 }

@@ -49,4 +49,13 @@ public class ItemController {
         Item item = itemService.returnItem(id);
         return new ItemResponse(item);
     }
+
+    @GetMapping("/admin")
+    public List<ItemResponse> getAllItemsForAdmin() {
+        return itemService.getAllItems()
+                .stream()
+                .map(ItemResponse::new)
+                .toList();
+    }
+
 }
