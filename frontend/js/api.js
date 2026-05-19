@@ -28,6 +28,11 @@ async function createItem(itemData) {
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Backend error status:", response.status);
+    console.error("Backend error response:", errorText);
+
     throw new Error("Failed to create item");
   }
 
