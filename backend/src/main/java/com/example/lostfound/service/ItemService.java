@@ -42,4 +42,31 @@ public class ItemService {
 
         return itemRepository.save(item);
     }
+
+    public Item approveItem(Long id) {
+        Item item = getItemById(id);
+        item.setStatus(ItemStatus.APPROVED);
+        return itemRepository.save(item);
+    }
+
+    public Item rejectItem(Long id) {
+        Item item = getItemById(id);
+        item.setStatus(ItemStatus.REJECTED);
+        return itemRepository.save(item);
+    }
+
+    public Item returnItem(Long id) {
+        Item item = getItemById(id);
+        item.setStatus(ItemStatus.RETURNED);
+        return itemRepository.save(item);
+    }
+
+    private Item getItemById(Long id) {
+        return itemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+    }
+
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
+    }
 }
