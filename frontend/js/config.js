@@ -1,1 +1,1 @@
-const API_BASE_URL = "https://backend-production-deb0.up.railway.app/api";
+const API_BASE_URL = "https://lostandfound-production-815f.up.railway.app";
