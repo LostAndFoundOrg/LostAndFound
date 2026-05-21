@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Details | Lost & Found AI</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <a href="index.html" class="logo">
+        <span class="logo-icon">♡</span>
+        <span>Lost & Found AI</span>
+    </a>
+
+    <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="create-item.html" class="nav-link">Add Item</a>
+        <a href="admin.html" class="nav-link">Admin</a>
+    </nav>
+</header>
+
+<main class="page">
+
+    <a href="index.html" class="back-link">
+        ← Back to items
+    </a>
+
+    <section id="detailsContainer" class="details-container">
+        <div class="loading-state">
+            Loading item details...
+        </div>
+    </section>
+
+    <section class="similar-section">
+        <div class="section-heading">
+            <div>
+                <h2>Similar matches</h2>
+                <p>Possible related lost or found items based on category, title, location, and date.</p>
+            </div>
+        </div>
+
+        <div id="matchesContainer" class="matches-grid">
+            <div class="empty-state">
+                <h3>No similar matches yet</h3>
+                <p>Matching will be connected when the backend endpoint is ready.</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/item-details.js"></script>
+</body>
+</html>

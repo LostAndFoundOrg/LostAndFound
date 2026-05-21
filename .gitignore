@@ -1,0 +1,33 @@
+# ─── SECRETS ────────────────────────────────────────────────
+.env
+.env.production
+.env.local
+application-local.properties
+
+# ─── INTELLIJ IDEA ──────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+out/
+
+# ─── VSCODE ─────────────────────────────────────────────────
+.vscode/
+
+# ─── MACOS ──────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ─── JAVA / MAVEN ───────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+
+# ─── LOGS ───────────────────────────────────────────────────
+logs/
+*.log
+spring.log
+
+# ─── UPLOADS (если будут фото) ──────────────────────────────
+uploads/

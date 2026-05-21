@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Lost & Found AI</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <a href="index.html" class="logo">
+        <span class="logo-icon">♡</span>
+        <span>Lost & Found AI</span>
+    </a>
+
+    <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="create-item.html" class="nav-link">Add Item</a>
+        <a href="admin.html" class="nav-link active">Admin</a>
+    </nav>
+</header>
+
+<main class="page">
+
+    <section class="admin-hero">
+        <div>
+            <p class="eyebrow">Moderation panel</p>
+            <h1>Admin Dashboard</h1>
+            <p>
+                Review submitted announcements, approve valid items, reject incorrect ones,
+                and mark returned items.
+            </p>
+        </div>
+
+        <div class="admin-controls">
+            <div class="admin-filter">
+                <label for="adminStatusFilter">Filter by status</label>
+                <select id="adminStatusFilter">
+                    <option value="ALL">All statuses</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="APPROVED">Approved</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="RETURNED">Returned</option>
+                    <option value="CLOSED">Closed</option>
+                </select>
+            </div>
+
+            <button type="button" class="btn btn-outline" id="logoutButton">
+                Logout
+            </button>
+        </div>
+    </section>
+
+    <section class="admin-stats">
+        <article class="stat-card stat-pending">
+            <span class="stat-icon">⏳</span>
+            <div>
+                <p>Pending</p>
+                <strong id="pendingCount">0</strong>
+            </div>
+        </article>
+
+        <article class="stat-card stat-approved">
+            <span class="stat-icon">✅</span>
+            <div>
+                <p>Approved</p>
+                <strong id="approvedCount">0</strong>
+            </div>
+        </article>
+
+        <article class="stat-card stat-rejected">
+            <span class="stat-icon">✕</span>
+            <div>
+                <p>Rejected</p>
+                <strong id="rejectedCount">0</strong>
+            </div>
+        </article>
+
+        <article class="stat-card stat-returned">
+            <span class="stat-icon">↩</span>
+            <div>
+                <p>Returned</p>
+                <strong id="returnedCount">0</strong>
+            </div>
+        </article>
+    </section>
+
+    <section class="admin-panel">
+        <div class="admin-panel-header">
+            <div>
+                <h2>All announcements</h2>
+                <p>Items from all statuses: Pending, Approved, Rejected, Returned and Closed.</p>
+            </div>
+
+            <button type="button" class="btn btn-outline" id="refreshAdminItemsButton">
+                Refresh
+            </button>
+        </div>
+
+        <div id="adminMessage"></div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Contact</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody id="adminItemsTableBody">
+                <tr>
+                    <td colspan="8">Loading admin items...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

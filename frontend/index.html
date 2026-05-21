@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lost & Found AI</title>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <a href="index.html" class="logo">
+    <span class="logo-icon">♡</span>
+    <span>Lost & Found AI</span>
+  </a>
+
+  <nav class="nav-menu">
+    <a href="index.html" class="nav-link active">Home</a>
+    <a href="create-item.html" class="nav-link">Add Item</a>
+    <a href="admin.html" class="nav-link">Admin</a>
+  </nav>
+</header>
+
+<main class="page">
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">Smart campus lost & found platform</p>
+
+      <h1>
+        Find lost items faster
+        <span>with smart matching</span>
+      </h1>
+
+      <p class="hero-text">
+        Report lost or found items, search by category and location,
+        and connect with the right person faster.
+      </p>
+
+      <div class="hero-actions">
+        <a href="create-item.html?type=LOST" class="btn btn-primary">
+          I lost something
+        </a>
+
+        <a href="create-item.html?type=FOUND" class="btn btn-success">
+          I found something
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-illustration">
+        <div class="illustration-bag">🎒</div>
+        <div class="illustration-small">🎧</div>
+        <div class="illustration-card">ID</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="search-panel">
+    <div class="search-row">
+      <div class="search-field">
+        <label for="searchInput">Search</label>
+        <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by title, description, or keyword..."
+        >
+      </div>
+
+      <div class="filter-field">
+        <label for="categoryFilter">Category</label>
+        <select id="categoryFilter">
+          <option value="">All categories</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="locationFilter">Location</label>
+        <input
+                type="text"
+                id="locationFilter"
+                placeholder="Enter location"
+        >
+      </div>
+
+      <button type="button" class="btn btn-outline" id="filterButton">
+        Filters
+      </button>
+    </div>
+
+    <div class="tabs-row">
+      <div class="filter-tabs">
+        <button type="button" class="filter-chip active" data-type="ALL">
+          All
+        </button>
+
+        <button type="button" class="filter-chip" data-type="LOST">
+          Lost
+        </button>
+
+        <button type="button" class="filter-chip" data-type="FOUND">
+          Found
+        </button>
+      </div>
+
+      <div class="sort-box">
+        <label for="sortSelect">Sort by</label>
+        <select id="sortSelect">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-heading">
+    <div>
+      <h2>Approved items</h2>
+      <p>Browse lost and found announcements approved by the moderator.</p>
+    </div>
+  </section>
+
+  <section id="itemsContainer" class="items-grid">
+    <div class="loading-state">
+      Loading items...
+    </div>
+  </section>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
