@@ -1,0 +1,67 @@
+version: '3.9'
+
+services:
+#  postgres:
+#    image: postgres:16-alpine
+#    container_name: lostfound-db
+#    restart: unless-stopped
+#    environment:
+#      POSTGRES_DB: ${POSTGRES_DB:-lost_found}
+#      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - lostfound-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lostfound-backend
+    restart: unless-stopped
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-lost_found}
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - lostfound-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: lostfound-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - lostfound-net
+
+networks:
+  lostfound-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
