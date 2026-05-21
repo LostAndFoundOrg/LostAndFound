@@ -1,7 +1,16 @@
+const adminToken = localStorage.getItem("adminToken");
+const adminRole = localStorage.getItem("adminRole");
+
+if (!adminToken || adminToken === "undefined" || adminRole !== "ADMIN") {
+    window.location.href = "admin-login.html";
+}
+
+
 const adminItemsTableBody = document.getElementById("adminItemsTableBody");
 const adminStatusFilter = document.getElementById("adminStatusFilter");
 const refreshAdminItemsButton = document.getElementById("refreshAdminItemsButton");
 const adminMessage = document.getElementById("adminMessage");
+const logoutButton = document.getElementById("logoutButton");
 
 const pendingCount = document.getElementById("pendingCount");
 const approvedCount = document.getElementById("approvedCount");
@@ -11,33 +20,33 @@ const returnedCount = document.getElementById("returnedCount");
 let allAdminItems = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadAdminItems();
+    if (adminStatusFilter) adminStatusFilter.addEventListener("change", applyAdminFilter);
+    if (refreshAdminItemsButton) refreshAdminItemsButton.addEventListener("click", loadAdminItems);
 
-    adminStatusFilter.addEventListener("change", applyAdminFilter);
-    refreshAdminItemsButton.addEventListener("click", loadAdminItems);
+    if (logoutButton) {
+        logoutButton.addEventListener("click", handleLogout);
+    }
+
+    await loadAdminItems();
 });
 
 async function loadAdminItems() {
     try {
         showAdminLoading();
-
         const items = await getAdminItems();
-
-        console.log("Admin items:", items);
-
         allAdminItems = items;
-
         updateStats(allAdminItems);
         applyAdminFilter();
     } catch (error) {
         console.error("Error while loading admin items:", error);
         showAdminError();
+        showAdminMessage("Session expired or unauthorized. Please login again.", "error-message");
     }
 }
 
 function applyAdminFilter() {
+    if (!adminStatusFilter) return;
     const selectedStatus = adminStatusFilter.value;
-
     let filteredItems = [...allAdminItems];
 
     if (selectedStatus !== "ALL") {
@@ -48,10 +57,10 @@ function applyAdminFilter() {
 }
 
 function updateStats(items) {
-    pendingCount.textContent = countByStatus(items, "PENDING");
-    approvedCount.textContent = countByStatus(items, "APPROVED");
-    rejectedCount.textContent = countByStatus(items, "REJECTED");
-    returnedCount.textContent = countByStatus(items, "RETURNED");
+    if (pendingCount) pendingCount.textContent = countByStatus(items, "PENDING");
+    if (approvedCount) approvedCount.textContent = countByStatus(items, "APPROVED");
+    if (rejectedCount) rejectedCount.textContent = countByStatus(items, "REJECTED");
+    if (returnedCount) returnedCount.textContent = countByStatus(items, "RETURNED");
 }
 
 function countByStatus(items, status) {
@@ -59,93 +68,45 @@ function countByStatus(items, status) {
 }
 
 function renderAdminItems(items) {
+    if (!adminItemsTableBody) return;
     adminItemsTableBody.innerHTML = "";
 
     if (!items || items.length === 0) {
         adminItemsTableBody.innerHTML = `
       <tr>
-        <td colspan="8" class="admin-empty-cell">
-          No items found for this status.
-        </td>
-      </tr>
-    `;
+        <td colspan="8" class="admin-empty-cell">No items found for this status.</td>
+      </tr>`;
         return;
     }
 
     items.forEach((item) => {
         const row = document.createElement("tr");
-
         row.innerHTML = `
       <td>
         <div class="admin-item-cell">
-          <div class="admin-item-title">
-            ${escapeHtml(item.title || "Untitled item")}
-          </div>
-          <div class="admin-item-description">
-            ${escapeHtml(shortenText(item.description, 70))}
-          </div>
+          <div class="admin-item-title">${escapeHtml(item.title || "Untitled item")}</div>
+          <div class="admin-item-description">${escapeHtml(shortenText(item.description, 70))}</div>
         </div>
       </td>
-
-      <td>
-        <span class="type-badge ${getTypeBadgeClass(item.type)}">
-          ${formatType(item.type)}
-        </span>
-      </td>
-
+      <td><span class="type-badge ${getTypeBadgeClass(item.type)}">${formatType(item.type)}</span></td>
       <td>${escapeHtml(item.categoryName || "No category")}</td>
-
       <td>${escapeHtml(item.location || "No location")}</td>
-
       <td>${formatDate(item.eventDate)}</td>
-
-      <td>
-        <span class="status-badge ${getStatusBadgeClass(item.status)}">
-          ${formatStatus(item.status)}
-        </span>
-      </td>
-
-      <td>
-        <div class="admin-contact">
-          ${escapeHtml(formatContact(item.contactMethod, item.contactValue))}
-        </div>
-      </td>
-
+      <td><span class="status-badge ${getStatusBadgeClass(item.status)}">${formatStatus(item.status)}</span></td>
+      <td><div class="admin-contact">${escapeHtml(formatContact(item.contactMethod, item.contactValue))}</div></td>
       <td>
         <div class="admin-actions">
-          <button
-            type="button"
-            class="admin-action-btn approve-btn"
-            data-action="approve"
-            data-id="${item.id}"
-            ${item.status === "APPROVED" ? "disabled" : ""}
-          >
-            Approve
-          </button>
-
-          <button
-            type="button"
-            class="admin-action-btn reject-btn"
-            data-action="reject"
-            data-id="${item.id}"
-            ${item.status === "REJECTED" ? "disabled" : ""}
-          >
-            Reject
-          </button>
-
-          <button
-            type="button"
-            class="admin-action-btn return-btn"
-            data-action="return"
-            data-id="${item.id}"
-            ${item.status === "RETURNED" ? "disabled" : ""}
-          >
-            Return
-          </button>
+          <button type="button" class="admin-action-btn approve-btn"
+            data-action="approve" data-id="${item.id}"
+            ${item.status === "APPROVED" ? "disabled" : ""}>Approve</button>
+          <button type="button" class="admin-action-btn reject-btn"
+            data-action="reject" data-id="${item.id}"
+            ${item.status === "REJECTED" ? "disabled" : ""}>Reject</button>
+          <button type="button" class="admin-action-btn return-btn"
+            data-action="return" data-id="${item.id}"
+            ${item.status === "RETURNED" ? "disabled" : ""}>Return</button>
         </div>
-      </td>
-    `;
-
+      </td>`;
         adminItemsTableBody.appendChild(row);
     });
 
@@ -153,14 +114,9 @@ function renderAdminItems(items) {
 }
 
 function attachAdminActionListeners() {
-    const actionButtons = document.querySelectorAll(".admin-action-btn");
-
-    actionButtons.forEach((button) => {
+    document.querySelectorAll(".admin-action-btn").forEach((button) => {
         button.addEventListener("click", async () => {
-            const itemId = button.dataset.id;
-            const action = button.dataset.action;
-
-            await handleAdminAction(itemId, action);
+            await handleAdminAction(button.dataset.id, button.dataset.action);
         });
     });
 }
@@ -168,22 +124,16 @@ function attachAdminActionListeners() {
 async function handleAdminAction(itemId, action) {
     try {
         clearAdminMessage();
-
         if (action === "approve") {
             await approveItem(itemId);
             showAdminMessage("Item approved successfully.", "success-message");
-        }
-
-        if (action === "reject") {
+        } else if (action === "reject") {
             await rejectItem(itemId);
             showAdminMessage("Item rejected successfully.", "success-message");
-        }
-
-        if (action === "return") {
+        } else if (action === "return") {
             await returnItem(itemId);
             showAdminMessage("Item marked as returned.", "success-message");
         }
-
         await loadAdminItems();
     } catch (error) {
         console.error("Admin action failed:", error);
@@ -192,134 +142,84 @@ async function handleAdminAction(itemId, action) {
 }
 
 function showAdminLoading() {
-    adminItemsTableBody.innerHTML = `
-    <tr>
-      <td colspan="8" class="admin-empty-cell">
-        Loading admin items...
-      </td>
-    </tr>
-  `;
+    if (adminItemsTableBody) {
+        adminItemsTableBody.innerHTML = `<tr><td colspan="8" class="admin-empty-cell">Loading admin items...</td></tr>`;
+    }
 }
 
 function showAdminError() {
-    adminItemsTableBody.innerHTML = `
-    <tr>
-      <td colspan="8" class="admin-empty-cell">
-        Failed to load admin items. Please check backend.
-      </td>
-    </tr>
-  `;
+    if (adminItemsTableBody) {
+        adminItemsTableBody.innerHTML = `<tr><td colspan="8" class="admin-empty-cell">Failed to load admin items. Please login again or check backend.</td></tr>`;
+    }
 }
 
 function showAdminMessage(text, className) {
-    adminMessage.textContent = text;
-    adminMessage.className = className;
+    if (adminMessage) {
+        adminMessage.textContent = text;
+        adminMessage.className = className;
+    }
 }
 
+// Fixed function declaration syntax
 function clearAdminMessage() {
-    adminMessage.textContent = "";
-    adminMessage.className = "";
+    if (adminMessage) {
+        adminMessage.textContent = "";
+        adminMessage.className = "";
+    }
 }
+
+function handleLogout() {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminRole");
+    window.location.href = "admin-login.html";
+}
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
 
 function getTypeBadgeClass(type) {
-    if (type === "LOST") {
-        return "type-lost";
-    }
-
-    if (type === "FOUND") {
-        return "type-found";
-    }
-
+    if (type === "LOST") return "type-lost";
+    if (type === "FOUND") return "type-found";
     return "";
 }
 
 function getStatusBadgeClass(status) {
-    if (status === "APPROVED") {
-        return "status-approved";
-    }
-
-    if (status === "PENDING") {
-        return "status-pending";
-    }
-
-    if (status === "RETURNED") {
-        return "status-returned";
-    }
-
-    if (status === "REJECTED") {
-        return "status-rejected";
-    }
-
-    if (status === "CLOSED") {
-        return "status-closed";
-    }
-
-    return "";
+    const map = { 
+        APPROVED: "status-approved", 
+        PENDING: "status-pending",
+        RETURNED: "status-returned", 
+        REJECTED: "status-rejected", 
+        CLOSED: "status-closed" 
+    };
+    return map[status] || "";
 }
 
 function formatType(type) {
-    if (type === "LOST") {
-        return "Lost item";
-    }
-
-    if (type === "FOUND") {
-        return "Found item";
-    }
-
+    if (type === "LOST") return "Lost item";
+    if (type === "FOUND") return "Found item";
     return type || "Unknown type";
 }
 
 function formatStatus(status) {
-    if (!status) {
-        return "Unknown";
-    }
-
+    if (!status) return "Unknown";
     return status.charAt(0) + status.slice(1).toLowerCase();
 }
 
 function formatDate(dateString) {
-    if (!dateString) {
-        return "No date";
-    }
-
+    if (!dateString) return "No date";
     const date = new Date(dateString);
-
-    if (Number.isNaN(date.getTime())) {
-        return dateString;
-    }
-
-    return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-    });
+    if (Number.isNaN(date.getTime())) return dateString;
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
 function shortenText(text, maxLength) {
-    if (!text) {
-        return "";
-    }
-
-    if (text.length <= maxLength) {
-        return text;
-    }
-
-    return text.slice(0, maxLength) + "...";
+    if (!text) return "";
+    return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
 }
 
 function formatContact(contactMethod, contactValue) {
-    if (!contactMethod && !contactValue) {
-        return "No contact";
-    }
-
-    if (!contactMethod) {
-        return contactValue;
-    }
-
-    if (!contactValue) {
-        return contactMethod;
-    }
-
+    if (!contactMethod && !contactValue) return "No contact";
+    if (!contactMethod) return contactValue;
+    if (!contactValue) return contactMethod;
     return `${contactMethod} - ${contactValue}`;
 }
 
@@ -331,3 +231,4 @@ function escapeHtml(value) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
+
