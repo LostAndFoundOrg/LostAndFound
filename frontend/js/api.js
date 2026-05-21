@@ -18,25 +18,13 @@ async function getApprovedItems() {
   return response.json();
 }
 
-async function createItem(itemData) {
+async function createItem(formData) {
   const response = await fetch(`${API_BASE_URL}/items`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(itemData)
+    body: formData
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-
-    console.error("Backend error status:", response.status);
-    console.error("Backend error response:", errorText);
-
-    throw new Error("Failed to create item");
-  }
-
-  return response.json();
+  return handleResponse(response);
 }
 
 async function getItemById(id) {
@@ -55,7 +43,9 @@ async function getItemById(id) {
 }
 
 async function getAdminItems() {
-  const response = await fetch(`${API_BASE_URL}/items/admin`);
+  const response = await fetch(`${API_BASE_URL}/items/admin`, {
+    headers: getAdminHeaders()
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -71,7 +61,8 @@ async function getAdminItems() {
 
 async function approveItem(id) {
   const response = await fetch(`${API_BASE_URL}/items/${id}/approve`, {
-    method: "PATCH"
+    method: "PATCH",
+    headers: getAdminHeaders()
   });
 
   if (!response.ok) {
@@ -88,7 +79,8 @@ async function approveItem(id) {
 
 async function rejectItem(id) {
   const response = await fetch(`${API_BASE_URL}/items/${id}/reject`, {
-    method: "PATCH"
+    method: "PATCH",
+    headers: getAdminHeaders()
   });
 
   if (!response.ok) {
@@ -105,7 +97,8 @@ async function rejectItem(id) {
 
 async function returnItem(id) {
   const response = await fetch(`${API_BASE_URL}/items/${id}/return`, {
-    method: "PATCH"
+    method: "PATCH",
+    headers: getAdminHeaders()
   });
 
   if (!response.ok) {
@@ -118,4 +111,64 @@ async function returnItem(id) {
   }
 
   return response.json();
+}
+async function handleResponse(response) {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Request failed");
+  }
+
+  return response.json();
+}
+
+function getAdminToken() {
+  return localStorage.getItem("adminToken");
+}
+
+function getAdminHeaders() {
+  const token = getAdminToken();
+
+  return {
+    "Authorization": `Bearer ${token}`
+  };
+}
+
+async function loginAdmin(username, password) {
+  const response = await fetch(`${API_BASE_URL}/admin/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      username,
+      password
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Admin login error status:", response.status);
+    console.error("Admin login error response:", errorText);
+
+    throw new Error("Invalid admin credentials");
+  }
+
+  return response.json();
+}
+
+async function getSimilarMatches(id) {
+  const response = await fetch(`${API_BASE_URL}/items/${id}/matches`);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error("Backend error status:", response.status);
+    console.error("Backend error response:", errorText);
+
+    throw new Error("Failed to fetch similar matches");
+  }
+
+  return response.json();
+
 }
