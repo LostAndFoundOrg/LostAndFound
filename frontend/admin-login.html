@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Lost & Found AI</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="navbar">
+    <a href="index.html" class="logo">
+        <span class="logo-icon">♡</span>
+        <span>Lost & Found AI</span>
+    </a>
+
+    <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="create-item.html" class="nav-link">Add Item</a>
+        <a href="admin-login.html" class="nav-link active">Admin</a>
+    </nav>
+</header>
+
+<main class="page">
+
+    <section class="login-layout">
+        <div class="login-card">
+            <p class="eyebrow">Admin access</p>
+
+            <h1>Sign in to Admin Panel</h1>
+
+            <p class="login-text">
+                Only moderators can approve, reject, or mark items as returned.
+            </p>
+
+            <form id="adminLoginForm" class="item-form">
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                            type="text"
+                            id="username"
+                            placeholder="enter your username"
+                            autocomplete="username"
+                            required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                            type="password"
+                            id="password"
+                            placeholder="Enter password"
+                            autocomplete="off"
+                            required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary submit-btn">
+                    Login
+                </button>
+
+            </form>
+
+            <p id="loginMessage"></p>
+        </div>
+
+        <aside class="tips-card login-info-card">
+            <h3>Protected area</h3>
+            <p>
+                Admin actions require a valid token. Without login, users cannot access
+                the admin list or change item statuses.
+            </p>
+        </aside>
+    </section>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/admin-auth.js"></script>
+</body>
+</html>
