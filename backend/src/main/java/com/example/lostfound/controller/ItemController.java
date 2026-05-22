@@ -3,11 +3,14 @@ package com.example.lostfound.controller;
 import com.example.lostfound.dto.CreateItemRequest;
 import com.example.lostfound.dto.ItemResponse;
 import com.example.lostfound.model.Item;
+import com.example.lostfound.service.CloudinaryService;
 import com.example.lostfound.service.ItemService;
 import com.example.lostfound.service.MatchingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,6 +21,7 @@ public class ItemController {
 
     private final ItemService itemService;
     private final MatchingService matchingService;
+    private final CloudinaryService cloudinaryService;
 
     @GetMapping
     public List<ItemResponse> getItems() {
@@ -33,8 +37,18 @@ public class ItemController {
                 .toList();
     }
 
-    @PostMapping
-    public ItemResponse createItem(@Valid @RequestBody CreateItemRequest request) {
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ItemResponse createItem(
+            @Valid @ModelAttribute CreateItemRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+
+        if (image != null && !image.isEmpty()) {
+            String uploadedUrl = cloudinaryService.uploadItemPhoto(image);
+            request.setImageUrl(uploadedUrl);
+        }
+
         Item item = itemService.createItem(request);
         return new ItemResponse(item);
     }
