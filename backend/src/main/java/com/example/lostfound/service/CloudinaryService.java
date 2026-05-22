@@ -14,30 +14,36 @@ public class CloudinaryService {
 
     private final Cloudinary cloudinary;
 
+    
     private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
             "image/jpeg",
             "image/png",
             "image/webp"
     );
 
+    
     public CloudinaryService(Cloudinary cloudinary) {
         this.cloudinary = cloudinary;
     }
 
+    
     public String uploadItemPhoto(MultipartFile file) {
+        
         if (file == null || file.isEmpty()) {
             return null;
         }
 
-        if (!ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
+       
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new IllegalArgumentException("Only JPG, PNG, and WEBP images are allowed");
         }
 
         try {
-            Map uploadResult = cloudinary.uploader().upload(
+        
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
                     file.getBytes(),
                     ObjectUtils.asMap(
-                            "folder", "lost-found/items",
                             "resource_type", "image"
                     )
             );
