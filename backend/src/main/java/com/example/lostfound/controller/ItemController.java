@@ -37,13 +37,18 @@ public class ItemController {
                 .toList();
     }
 
+   
+    @GetMapping("/{id}")
+    public ItemResponse getItemById(@PathVariable Long id) {
+        Item item = itemService.getItemById(id);
+        return new ItemResponse(item);
+    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ItemResponse createItem(
             @Valid @ModelAttribute CreateItemRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-
         if (image != null && !image.isEmpty()) {
             String uploadedUrl = cloudinaryService.uploadItemPhoto(image);
             request.setImageUrl(uploadedUrl);
