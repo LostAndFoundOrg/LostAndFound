@@ -1,5 +1,5 @@
 async function getCategories() {
-  const response = await fetch(`${API_BASE_URL}/categories`);
+  const response = await fetch(`${API_BASE_URL}/api/categories`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch categories");
@@ -9,7 +9,7 @@ async function getCategories() {
 }
 
 async function getApprovedItems() {
-  const response = await fetch(`${API_BASE_URL}/items`);
+  const response = await fetch(`${API_BASE_URL}/api/items`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch items");
@@ -19,7 +19,7 @@ async function getApprovedItems() {
 }
 
 async function createItem(formData) {
-  const response = await fetch(`${API_BASE_URL}/items`, {
+  const response = await fetch(`${API_BASE_URL}/api/items`, {
     method: "POST",
     body: formData
   });
@@ -28,7 +28,7 @@ async function createItem(formData) {
 }
 
 async function getItemById(id) {
-  const response = await fetch(`${API_BASE_URL}/items/${id}`);
+  const response = await fetch(`${API_BASE_URL}/api/items/${id}`);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -43,7 +43,7 @@ async function getItemById(id) {
 }
 
 async function getAdminItems() {
-  const response = await fetch(`${API_BASE_URL}/items/admin`, {
+  const response = await fetch(`${API_BASE_URL}/api/items/admin`, {
     headers: getAdminHeaders()
   });
 
@@ -60,7 +60,7 @@ async function getAdminItems() {
 }
 
 async function approveItem(id) {
-  const response = await fetch(`${API_BASE_URL}/items/${id}/approve`, {
+  const response = await fetch(`${API_BASE_URL}/api/items/${id}/approve`, {
     method: "PATCH",
     headers: getAdminHeaders()
   });
@@ -78,7 +78,7 @@ async function approveItem(id) {
 }
 
 async function rejectItem(id) {
-  const response = await fetch(`${API_BASE_URL}/items/${id}/reject`, {
+  const response = await fetch(`${API_BASE_URL}/api/items/${id}/reject`, {
     method: "PATCH",
     headers: getAdminHeaders()
   });
@@ -96,7 +96,7 @@ async function rejectItem(id) {
 }
 
 async function returnItem(id) {
-  const response = await fetch(`${API_BASE_URL}/items/${id}/return`, {
+  const response = await fetch(`${API_BASE_URL}/api/items/${id}/return`, {
     method: "PATCH",
     headers: getAdminHeaders()
   });
@@ -134,7 +134,7 @@ function getAdminHeaders() {
 }
 
 async function loginAdmin(username, password) {
-  const response = await fetch(`${API_BASE_URL}/admin/login`, {
+  const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -158,7 +158,7 @@ async function loginAdmin(username, password) {
 }
 
 async function getSimilarMatches(id) {
-  const response = await fetch(`${API_BASE_URL}/items/${id}/matches`);
+  const response = await fetch(`${API_BASE_URL}/api/items/${id}/matches`);
 
   if (!response.ok) {
     const errorText = await response.text();
