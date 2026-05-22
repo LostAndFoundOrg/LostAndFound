@@ -11,6 +11,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -18,7 +20,7 @@ public class MatchingService {
 
     private final ItemRepository itemRepository;
 
-    @Value("${gemini.api.key}")
+    @Value("${gemini.api.key:}")
     private String geminiApiKey;
 
     public MatchingService(ItemRepository itemRepository) {
@@ -35,76 +37,88 @@ public class MatchingService {
 
         List<Item> oppositeItems = itemRepository.findByTypeAndStatus(oppositeType, ItemStatus.APPROVED);
 
+      
+        record ScoredItem(Item item, int score) {}
+
         return oppositeItems.stream()
-                .filter(item -> calculateScore(currentItem, item) >= 30)
-                .sorted((item1, item2) -> {
-                    int score1 = calculateScore(currentItem, item1);
-                    int score2 = calculateScore(currentItem, item2);
-                    return Integer.compare(score2, score1);
-                })
+                .map(item -> new ScoredItem(item, calculateScore(currentItem, item)))
+                .filter(si -> si.score() >= 30)
+                .sorted(Comparator.comparingInt(ScoredItem::score).reversed())
+                .map(ScoredItem::item)
                 .toList();
     }
 
-    public int calculateScore(Item lostItem, Item foundItem) {
+    public int calculateScore(Item item1, Item item2) {
         int score = 0;
 
-        if (lostItem.getCategory() != null && foundItem.getCategory() != null) {
-            if (lostItem.getCategory().getId().equals(foundItem.getCategory().getId())) {
+      
+        if (item1.getCategory() != null && item2.getCategory() != null) {
+            if (item1.getCategory().getId().equals(item2.getCategory().getId())) {
                 score += 40;
             }
         }
 
-        String lostText = lostItem.getTitle() + " " + lostItem.getDescription();
-        String foundText = foundItem.getTitle() + " " + foundItem.getDescription();
-
-        int aiScore = getAiTextScore(lostText, foundText);
-
-        score += aiScore;
+       
+        if (geminiApiKey != null && !geminiApiKey.isBlank()) {
+            String text1 = item1.getTitle() + " " + item1.getDescription();
+            String text2 = item2.getTitle() + " " + item2.getDescription();
+            score += getAiTextScore(text1, text2);
+        }
 
         return score;
     }
 
-    private int getAiTextScore(String lostText, String foundText) {
+    private int getAiTextScore(String text1, String text2) {
         try {
             String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
 
-            String prompt = String.format(
-                    "Сравни два описания объявлений бюро находок. " +
-                            "Первое: '%s'. Второе: '%s'. " +
-                            "Оцени, насколько вероятно, что это одна и та же вещь. " +
-                            "Ответь СТРОГО одной цифрой от 0 до 60, где 0 — абсолютно разные вещи, а 60 — точно одна и та же вещь (учитывай синонимы и контекст). " +
-                            "Никакого лишнего текста, только цифра.",
-                    lostText.replace("\"", "\\\""), foundText.replace("\"", "\\\"")
-            );
+          
+            String safeText1 = text1.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", "");
+            String safeText2 = text2.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", "");
 
-            String jsonRequestBody = "{\n" +
-                    "  \"contents\": [{\n" +
-                    "    \"parts\": [{\n" +
-                    "      \"text\": \"" + prompt + "\"\n" +
-                    "    }]\n" +
-                    "  }]\n" +
-                    "}\n";
+            String prompt = "Compare these two lost-and-found item descriptions and estimate the probability they are the same item. " +
+                    "First: '" + safeText1 + "'. Second: '" + safeText2 + "'. " +
+                    "Reply with ONLY a single integer from 0 to 60. 0 = completely different, 60 = definitely the same item. No other text.";
 
-            HttpClient client = HttpClient.newHttpClient();
+            String jsonBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + prompt + "\"}]}]}";
+
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(5))
+                    .build();
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody))
+                    .timeout(Duration.ofSeconds(8))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String responseBody = response.body();
+            String body = response.body();
 
-            if (responseBody != null && responseBody.contains("\"text\": \"")) {
-                int startIndex = responseBody.indexOf("\"text\": \"") + 9;
-                int endIndex = responseBody.indexOf("\"", startIndex);
-                String aiNumberStr = responseBody.substring(startIndex, endIndex).trim();
+            System.out.println("Gemini response: " + body);
 
-                return Integer.parseInt(aiNumberStr);
+            
+            if (body != null && body.contains("\"text\":")) {
+                int textIdx = body.indexOf("\"text\":") + 7;
+                
+                while (textIdx < body.length() && (body.charAt(textIdx) == ' ' || body.charAt(textIdx) == '"')) {
+                    textIdx++;
+                }
+                StringBuilder digits = new StringBuilder();
+                while (textIdx < body.length() && Character.isDigit(body.charAt(textIdx))) {
+                    digits.append(body.charAt(textIdx));
+                    textIdx++;
+                }
+                if (digits.length() > 0) {
+                    int aiScore = Integer.parseInt(digits.toString());
+                    
+                    return Math.max(0, Math.min(60, aiScore));
+                }
             }
 
         } catch (Exception e) {
-            System.err.println("Ошибка при запросе к Gemini API: " + e.getMessage());
+            System.err.println("Gemini API error: " + e.getMessage());
         }
 
         return 0;
