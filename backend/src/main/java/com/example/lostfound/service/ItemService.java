@@ -22,6 +22,12 @@ public class ItemService {
         return itemRepository.findByStatus(ItemStatus.APPROVED);
     }
 
+    
+    public Item getItemById(Long id) {
+        return itemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+    }
+
     public Item createItem(CreateItemRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -59,11 +65,6 @@ public class ItemService {
         Item item = getItemById(id);
         item.setStatus(ItemStatus.RETURNED);
         return itemRepository.save(item);
-    }
-
-    private Item getItemById(Long id) {
-        return itemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
     }
 
     public List<Item> getAllItems() {
