@@ -1,0 +1,96 @@
+name: CI — Build & Security Scan
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-build-and-scan:
+    name: Backend — Build & Dependency Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build backend
+        working-directory: backend
+        run: ./mvnw clean package -DskipTests
+
+      - name: OWASP Dependency-Check
+        working-directory: backend
+        run: |
+          ./mvnw org.owasp:dependency-check-maven:check \
+            -DfailBuildOnCVSS=7 \
+            -DsuppressionFile=suppression.xml \
+            || true
+
+      - name: Upload Dependency-Check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: backend/target/dependency-check-report.html
+
+  frontend-audit:
+    name: Frontend — npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for package.json
+        id: check_npm
+        run: |
+          if [ -f frontend/package.json ]; then
+            echo "has_npm=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_npm=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Node.js
+        if: steps.check_npm.outputs.has_npm == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: npm install & audit
+        if: steps.check_npm.outputs.has_npm == 'true'
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --audit-level=high
+
+      - name: Skip (no package.json)
+        if: steps.check_npm.outputs.has_npm == 'false'
+        run: echo "No package.json in frontend — skipping npm audit."
+
+  docker-lint:
+    name: Dockerfile Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint backend Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: backend/Dockerfile
+          failure-threshold: warning
+
+      - name: Lint frontend Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: frontend/Dockerfile
+          failure-threshold: warning
