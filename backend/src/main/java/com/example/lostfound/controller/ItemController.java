@@ -7,6 +7,8 @@ import com.example.lostfound.service.CloudinaryService;
 import com.example.lostfound.service.ItemService;
 import com.example.lostfound.service.MatchingService;
 import jakarta.validation.Valid;
+import com.example.lostfound.security.AuditLogService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ public class ItemController {
     private final ItemService itemService;
     private final MatchingService matchingService;
     private final CloudinaryService cloudinaryService;
+    private final AuditLogService auditLogService;
 
     @GetMapping
     public List<ItemResponse> getItems() {
