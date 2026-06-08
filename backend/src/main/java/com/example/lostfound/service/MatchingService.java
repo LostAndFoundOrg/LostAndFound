@@ -70,7 +70,7 @@ public class MatchingService {
 
     private int getAiTextScore(String text1, String text2) {
         try {
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+           String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + geminiApiKey;
 
           
             String safeText1 = text1.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", "");
