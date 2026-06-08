@@ -1,28 +1,31 @@
 package com.example.lostfound.service;
 
 import com.example.lostfound.dto.CreateItemRequest;
+import com.example.lostfound.messaging.ItemEventPublisher;
 import com.example.lostfound.model.Category;
 import com.example.lostfound.model.Item;
 import com.example.lostfound.model.ItemStatus;
 import com.example.lostfound.repository.CategoryRepository;
 import com.example.lostfound.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemService {
 
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
+    private final ItemEventPublisher itemEventPublisher;
 
     public List<Item> getApprovedItems() {
         return itemRepository.findByStatus(ItemStatus.APPROVED);
     }
 
-    
     public Item getItemById(Long id) {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
@@ -46,7 +49,12 @@ public class ItemService {
                 .status(ItemStatus.PENDING)
                 .build();
 
-        return itemRepository.save(item);
+        Item saved = itemRepository.save(item);
+
+        itemEventPublisher.publishItemCreated(saved);
+        log.info("[ItemService] Item created and event published: id={} type={}", saved.getId(), saved.getType());
+
+        return saved;
     }
 
     public Item approveItem(Long id) {
