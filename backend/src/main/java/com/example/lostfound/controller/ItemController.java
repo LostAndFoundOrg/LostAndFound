@@ -40,7 +40,7 @@ public class ItemController {
                 .toList();
     }
 
-   
+
     @GetMapping("/{id}")
     public ItemResponse getItemById(@PathVariable Long id) {
         Item item = itemService.getItemById(id);
